@@ -4,63 +4,52 @@ from PyPDF2 import PdfReader
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from commons import init_model, init_embedding
+import pandas as pd
 
 model = init_model()
 embedding = init_embedding()
-text_splitter = TokenTextSplitter.from_tiktoken_encoder(model_name="gpt-4o-mini")
+calabarzon_provinces = ["Cavite", "Laguna", "Batangas", "Rizal", "Quezon"]
 
-def get_vectorstore(text_chunks):
-    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embedding)
-    return vectorstore
+df = pd.read_csv("/home/franciscovilla/GenAI/15Days-SoloProject/src/calabarzon-touristspots.csv")
 
-def generate_itinerary(location, interests):
-    prompt = f"""You are a travel agent creating a detailed itinerary for the tourists spots/destinations in the Philippines.
-
-    Location: {location}
-    Interests: {interests}
-
-    Create a multi-day itinerary. For each day, suggest specific activities, restaurants (if known), and points of interest. Be creative and provide a variety of options. Consider the user's interests when making suggestions. Provide estimated timeframes for activities. Format the itinerary clearly and concisely.
-
-    Example:
-
-    **Day 1: Arrival and City Exploration**
-
-    * Morning (9:00 AM): Arrive at {location}, transfer to hotel.
-    * Afternoon (1:00 PM): Lunch at [Restaurant Name] (Cuisine type).
-    * ...
-
-    **Day 2: ...**
-    ...
-    """
-
-    itinerary = model(prompt)
-    return itinerary.content  # Extract the text content
-
+# Create and store vectorstore in session state (only once)
+if "vectorstore" not in st.session_state:
+    texts = df["Destination-Activities"].tolist()
+    metadatas = df.drop("Destination-Activities", axis=1).to_dict(orient="records")
+    vectorstore = FAISS.from_texts(texts, embedding, metadatas=metadatas)
+    st.session_state.vectorstore = vectorstore
+    
 def main():
-    st.set_page_config(page_title="AI Travel Assistant - Philippines", page_icon=":airplane:")
-    st.header("AI Travel Assistant - Philippines :flag-ph:")
+    st.set_page_config(page_title="AI Travel Assistant", page_icon=":airplane:")
+    st.header("AI Travel Assistant")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Display chat messages from history FIRST
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
     with st.sidebar:
         st.subheader("Your Preferences")
-        location = st.text_input("Enter your desired location", placeholder= "Enter location here")
-        interest = st.multiselect("Interests (optional)", ["Dive", "Nature", "Sun and Beach", "Adventure", "Food and Hospitality", "Events and Culture"])
+        location = st.selectbox("Enter your desired location", calabarzon_provinces)
+        interest = st.multiselect("Interests (optional)", ["Nature", "Food", "Adventure"])
 
         if st.button("Generate Itinerary"):
             if location:
                 with st.spinner("Generating Itinerary..."):
-                    itinerary = generate_itinerary(location, interest)
+                    query_embedding = embedding.embed_query(f"{location} {' '.join(interest)}")  # Use the initialized embedding
+                    results = st.session_state.vectorstore.similarity_search_with_score_by_vector(query_embedding, k=5)
 
-                    # Update chat history and display immediately
+                    prompt = f"You are a travel agent... Here are some destinations and activities:\n\n"
+                    for doc, score in results:
+                        metadata = doc.metadata
+                        prompt += f"- **{doc.page_content}** (Province: {metadata['Province']}, Description: {metadata['Description']})\n"
+
+                    itinerary = model(prompt).content  # Use your LLM from commons.py
+
                     st.session_state.messages.append({"role": "assistant", "content": itinerary})
-                    st.rerun()  # Force Streamlit to rerun to update the chat display
+                    st.rerun()
 
             else:
                 st.warning("Please enter a location.")
@@ -78,8 +67,6 @@ def main():
                 st.session_state.messages.append({"role": "assistant", "content": answer})
                 with st.chat_message("assistant"):
                     st.markdown(answer)
-        else:
-            st.warning("Please process the documents first.")
 
 if __name__ == "__main__":
     main()
