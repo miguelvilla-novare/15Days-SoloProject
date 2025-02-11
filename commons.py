@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 import os
 
-MODEL_NAME = "gpt-4o-mini"
+MODEL_NAME = "gpt-4o"
 EMBEDDING_NAME = "text-embedding-3-small"
 BASE_URL = "https://ainovate.novare.com.hk/"
 
