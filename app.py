@@ -21,7 +21,7 @@ if "vectorstore" not in st.session_state:
     
 def main():
     st.set_page_config(page_title="AI Travel Assistant", page_icon=":airplane:")
-    st.header("AI Travel Assistant")
+    st.header("AI Travel Assistant- CALABARZON")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -41,7 +41,29 @@ def main():
                     query_embedding = embedding.embed_query(f"{location} {' '.join(interest)}")  # Use the initialized embedding
                     results = st.session_state.vectorstore.similarity_search_with_score_by_vector(query_embedding, k=5)
 
-                    prompt = f"You are a travel agent... Here are some destinations and activities:\n\n"
+                    prompt = f"""You are a travel agent creating a detailed itinerary. Use the following template for the itinerary and strictly follow the user's location and interests
+                                Fill every section in the example below with specific details for each day and activity.  
+                                Be creative and consider the user's interests when making suggestions.  If a particular section (like Lunch or Evening) is not applicable, you can omit it.
+                                Provide realistic timeframes.
+            
+                        Example:
+                        Location: {location}
+                        Interests: {interest}
+                        
+                        Day 1: Arrival and Exploring Liliw
+                        
+                        Morning (9:00 AM - 12:00 PM)
+                        Activity: Liliw Footwear Shopping
+                        Location: Liliw, Laguna
+                        Description: Start your day in the charming town of Liliw... (rest of the description)
+
+                        Lunch (12:30 PM - 1:30 PM)
+                        Restaurant: Arabela
+                        Description: Savor delicious pasta dishes... 
+                        
+                        (rest of the itinerary)
+            
+                        """
                     for doc, score in results:
                         metadata = doc.metadata
                         prompt += f"- **{doc.page_content}** (Province: {metadata['Province']}, Description: {metadata['Description']})\n"
