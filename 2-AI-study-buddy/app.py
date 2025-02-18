@@ -28,6 +28,8 @@ def main():
                 st.session_state.vectorstore = vectorstore
                 st.success("Documents processed!")
                 st.session_state.text_chunks = text_chunks  # Store text chunks
+                
+        st.subheader("Actions")  # Subheader for clarity
 
         # Button container for Generate buttons
         st.container()
@@ -44,10 +46,21 @@ def main():
                     st.error(f"An error occurred during summarization: {e}")
 
         show_summary_button_disabled = "summary" not in st.session_state
-        if col1.button("Show Summary", key="show_summary_button", disabled=show_summary_button_disabled) and "summary" in st.session_state:
+        if col2.button("Show Summary", key="show_summary_button", disabled=show_summary_button_disabled) and "summary" in st.session_state:
             st.session_state.show_summary_popup = True
+    
 
-        if st.button("Generate Quiz Questions"):
+        # Full-width buttons below
+        if col1.button("Generate Flashcards", disabled="text_chunks" not in st.session_state):
+            with st.spinner("Generating Flashcards..."):
+                try:
+                    flashcards = get_flashcards(st.session_state.text_chunks, model)  # Use stored text_chunks
+                    st.session_state.flashcards = flashcards
+                    st.success("Flashcards Generated!")
+                except Exception as e:
+                    st.error(f"An error occurred during flashcard generation: {e}")
+
+        if col2.button("Take Quiz", disabled="text_chunks" not in st.session_state):
             with st.spinner("Generating Quiz..."):
                 try:
                     quiz_questions = generate_quiz_questions(st.session_state.text_chunks, model)
@@ -59,6 +72,8 @@ def main():
                     st.success("Quiz questions generated!")
                 except Exception as e:
                     st.error(f"An error occurred during quiz question generation: {e}")
+                    
+        
 
     if "quiz_questions" in st.session_state and st.session_state.quiz_questions:
         if st.session_state.current_question < len(st.session_state.quiz_questions):
