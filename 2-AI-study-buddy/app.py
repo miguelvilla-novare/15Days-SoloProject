@@ -80,14 +80,23 @@ def main():
             question_data = st.session_state.quiz_questions[st.session_state.current_question]
 
             st.subheader(f"Question {st.session_state.current_question + 1} of {len(st.session_state.quiz_questions)}")
-            st.write(question_data.get("Question", "Question text not available"))
+            st.markdown(f"**{question_data.get('Question', 'Question text not available')}**")
 
             question_type = question_data.get("Type")
 
             if question_type == "multiple_choice":
                 options_str = question_data.get("Options", "")
                 options_list = options_str.split(",")
-                options = {opt.split(")")[1].strip(): opt.split(")")[0].strip() for opt in options_list if ")" in opt}
+                
+                options = {}
+                option_letters = ['A', 'B', 'C', 'D']
+                
+                for i, opt in enumerate(options_list):
+                    if i < len(option_letters):
+                        # Correctly assign letters and options
+                        letter = option_letters[i]
+                        option_text = opt.split(")")[1].strip() if ")" in opt else opt.strip() # Handle options without parentheses
+                        options[f"{letter}) {option_text}"] = opt.split(")")[0].strip() if ")" in opt else opt.split(")")[0].strip()
 
                 if options:
                     user_answer_text = st.radio("Select an answer", list(options.keys()), disabled=st.session_state.submitted)
