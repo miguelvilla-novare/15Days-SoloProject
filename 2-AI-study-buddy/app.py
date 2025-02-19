@@ -51,7 +51,7 @@ def main():
     
 
         # Full-width buttons below
-        if col1.button("Generate Flashcards", disabled="text_chunks" not in st.session_state):
+        if col1.button("Generate Flashcards", key="generate_flashcards_button", disabled="text_chunks" not in st.session_state):
             with st.spinner("Generating Flashcards..."):
                 try:
                     flashcards = get_flashcards(st.session_state.text_chunks, model)  # Use stored text_chunks
@@ -60,7 +60,7 @@ def main():
                 except Exception as e:
                     st.error(f"An error occurred during flashcard generation: {e}")
 
-        if col2.button("Take Quiz", disabled="text_chunks" not in st.session_state):
+        if col2.button("Take Quiz", key="take_quiz_button", disabled="text_chunks" not in st.session_state):
             with st.spinner("Generating Quiz..."):
                 try:
                     quiz_questions = generate_quiz_questions(st.session_state.text_chunks, model)

@@ -62,8 +62,10 @@ def get_summary(text_chunks, model):
     if len(docs) > 5:  # Check number of documents, not text_chunks
        chain = load_summarize_chain(model, chain_type="map_reduce", prompt=summary_prompt) #Consider refine as well
 
-    summary = chain.invoke(docs)  # Pass the list of Documents
-    return summary
+    summary_dict = chain.invoke(docs)  # Pass the list of Documents
+    summary_text = summary_dict["output_text"]
+    
+    return summary_text
 
 def generate_quiz_questions(text_chunks, model):
     """Generates 5 multiple-choice quiz questions from text chunks (NO STREAMLIT DEPENDENCY)."""
