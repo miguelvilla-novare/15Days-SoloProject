@@ -73,8 +73,15 @@ def main():
                 except Exception as e:
                     st.error(f"An error occurred during quiz question generation: {e}")
                     
-        
+                    
+    if "quiz_questions" in st.session_state and st.session_state.quiz_questions:
+        quiz_is_active = st.session_state.current_question < len(st.session_state.quiz_questions) if "current_question" in st.session_state else False
+    else:
+        quiz_is_active = False  # Explicitly set to False when quiz_questions is empty
 
+    chat_input_disabled = quiz_is_active  # Disable if quiz is active
+    
+    
     if "quiz_questions" in st.session_state and st.session_state.quiz_questions:
         if st.session_state.current_question < len(st.session_state.quiz_questions):
             question_data = st.session_state.quiz_questions[st.session_state.current_question]
@@ -87,15 +94,14 @@ def main():
             if question_type == "multiple_choice":
                 options_str = question_data.get("Options", "")
                 options_list = options_str.split(",")
-                
+
                 options = {}
                 option_letters = ['A', 'B', 'C', 'D']
-                
+
                 for i, opt in enumerate(options_list):
                     if i < len(option_letters):
-                        # Correctly assign letters and options
                         letter = option_letters[i]
-                        option_text = opt.split(")")[1].strip() if ")" in opt else opt.strip() # Handle options without parentheses
+                        option_text = opt.split(")")[1].strip() if ")" in opt else opt.strip()
                         options[f"{letter}) {option_text}"] = opt.split(")")[0].strip() if ")" in opt else opt.split(")")[0].strip()
 
                 if options:
@@ -103,46 +109,42 @@ def main():
                     user_answer_letter = options.get(user_answer_text)
 
                     if st.button("Submit") and not st.session_state.submitted:
-                        st.session_state.submitted = True  # Mark question as submitted
+                        st.session_state.submitted = True
 
-                        # Check answer
                         if user_answer_letter == question_data.get("Correct Answer"):
                             explanation = question_data.get("Explanation", "No explanation available.")
-                            st.success(f"""Your answer is correct!  
+                            st.success(f"""Your answer is correct!
                                             **Explanation:** {explanation}""")
                             st.session_state.score += 1
                         else:
                             st.error(f"Incorrect. The correct answer is **{question_data.get('Correct Answer', 'Not available')}**.")
 
-            # ✅ Add "Next" button after submission
             if st.session_state.submitted:
                 if st.button("Next"):
-                    st.session_state.current_question += 1  # Move to next question
-                    st.session_state.submitted = False  # Reset submission state
-                    st.rerun()  # Refresh to load next question
+                    st.session_state.current_question += 1
+                    st.session_state.submitted = False
+                    st.rerun()
 
         else:
-            # ✅ Display final score
             st.subheader("🎉 Quiz Completed!")
             st.write(f"Your final score: **{st.session_state.score} / {len(st.session_state.quiz_questions)}**")
 
-            # ✅ Restart or End Quiz
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("Restart Quiz"):
                     st.session_state.current_question = 0
                     st.session_state.score = 0
                     st.session_state.submitted = False
-                    st.rerun()  # Restart quiz
+                    st.rerun()
 
             with col2:
                 if st.button("End Quiz"):
-                     # Reset quiz state, but keep processed_data
-                    st.session_state.current_question = 0  # Reset, not delete
+                    st.session_state.current_question = 0
                     st.session_state.score = 0
                     st.session_state.submitted = False
-                    st.session_state.quiz_questions = [] #Clear quiz questions
+                    st.session_state.quiz_questions = []
                     st.rerun()
+
 
     if "show_summary_popup" in st.session_state and st.session_state.show_summary_popup:  # Check the flag
         st.write(st.session_state.summary)
@@ -161,7 +163,7 @@ def main():
             st.markdown(message["content"])
 
     # User input section
-    if user_input := st.chat_input("Ask a question about your documents..."):
+    if user_input := st.chat_input("Ask a question about your documents...", disabled=chat_input_disabled):
         if user_input:  # Check if user_input is not empty
             if moderate_text(user_input):  # Check if input is SAFE
                 # Input is safe, proceed with LLM processing
