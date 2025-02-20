@@ -10,8 +10,9 @@ MODERATION_MODEL = "omni-moderation-latest"
 
 
 load_dotenv()
+
 def init_model() -> ChatOpenAI:
-    return ChatOpenAI(model=MODEL_NAME, base_url=BASE_URL)
+    return ChatOpenAI(model_name=MODEL_NAME, base_url=BASE_URL)
 
 def init_embedding() -> OpenAIEmbeddings:
     return OpenAIEmbeddings(model=EMBEDDING_NAME, base_url=BASE_URL)
