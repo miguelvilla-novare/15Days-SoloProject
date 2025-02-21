@@ -75,7 +75,7 @@ def generate_flashcards(text_chunks: list, model) -> list:
 
     flashcard_prompt = PromptTemplate(
         input_variables=["text"],
-        template="Generate concise and useful flashcards from the following text:\n{text}\n\n"
+        template="Generate concise and stricly an identification type of flashcards from the following text:\n{text}\n\n"
                  "Each flashcard should have:\n"
                  "- **Front (Question):** A key concept in question form.\n"
                  "- **Back (Answer):** The answer or explanation.\n\n"

@@ -1,16 +1,7 @@
 # utils.py
 from PyPDF2 import PdfReader
 from langchain_community.vectorstores import FAISS
-from langchain.docstore.document import Document
-from langchain_text_splitters import TokenTextSplitter
-from langchain.chains.summarize import load_summarize_chain
-from langchain.prompts import PromptTemplate
-from streamlit import json
-from commons import init_model, init_embedding, init_moderation
-from langchain.chains import LLMChain
-from openai import OpenAI
-import re
-
+from commons import init_embedding, init_moderation
 
 embedding = init_embedding()  # Initialize the embedding from commons.py
 moderation_client = init_moderation()
@@ -87,3 +78,5 @@ def parse_flashcards(text: str) -> list:
             flashcards.append({"front": front, "back": back})
 
     return flashcards
+
+
