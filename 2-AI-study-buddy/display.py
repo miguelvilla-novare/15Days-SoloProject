@@ -92,13 +92,13 @@ def display_quiz():
 
             with col2:
                 if st.button("End Quiz"):
+                    del st.session_state.quiz_questions
                     st.session_state.current_question = 0
                     st.session_state.score = 0
                     st.session_state.submitted = False
-                    st.session_state.quiz_questions = []
                     st.rerun()
 
-
+import streamlit as st
 
 def display_flashcards():
     """Handles the display and interaction of flashcards."""
@@ -129,35 +129,50 @@ def display_flashcards():
 
         st.markdown("---")
 
-        # Navigation Buttons - Adjusting column widths for better alignment
-        col1, col2, col3 = st.columns([1, 2, 1])  # Balanced spacing
+        # Navigation Buttons - Equal columns and centered content
+        col1, col2, col3 = st.columns(3)  # Equal columns
+
+        # Custom CSS for consistent button widths
+        st.markdown(
+            """
+            <style>
+            div.stButton > button {
+                min-width: 150px; /* Adjust this value as needed */
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
 
         with col1:
-            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-            if st.button("⬅️ Previous", disabled=st.session_state.current_flashcard == 0):
-                st.session_state.current_flashcard -= 1
-                st.session_state.reveal_answer = False
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        with col2:
-            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-            if st.button("❌ Exit Flashcards"):
-                for key in ["current_flashcard", "reveal_answer", "flashcards"]:
-                    st.session_state.pop(key, None)
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        with col3:
-            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-            if st.session_state.current_flashcard < total_flashcards - 1:
-                if st.button("➡️ Next"):
-                    st.session_state.current_flashcard += 1
+            with st.container():
+                st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+                if st.button("⬅️ Previous", disabled=st.session_state.current_flashcard == 0):
+                    st.session_state.current_flashcard -= 1
                     st.session_state.reveal_answer = False
                     st.rerun()
-            else:
-                if st.button("🏁 Exit Flashcards"):
+                st.markdown("</div>", unsafe_allow_html=True)
+
+        with col2:
+            with st.container():
+                st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+                if st.button("❌ Exit Flashcards"):
                     for key in ["current_flashcard", "reveal_answer", "flashcards"]:
                         st.session_state.pop(key, None)
                     st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+
+        with col3:
+            with st.container():
+                st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+                if st.session_state.current_flashcard < total_flashcards - 1:
+                    if st.button("➡️ Next"):
+                        st.session_state.current_flashcard += 1
+                        st.session_state.reveal_answer = False
+                        st.rerun()
+                else:
+                    if st.button("🏁 Exit Flashcards"):
+                        for key in ["current_flashcard", "reveal_answer", "flashcards"]:
+                            st.session_state.pop(key, None)
+                        st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)

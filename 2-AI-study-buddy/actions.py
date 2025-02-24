@@ -107,7 +107,12 @@ def handle_user_input(user_input, model):
 
     if not moderate_text(user_input):  # Check if input is safe
         st.warning("Your input was flagged as inappropriate. Please try again.")
+        st.session_state.moderation_warning = True #set warning flag
         return
+
+    # Reset the warning flag if the moderation passes
+    if "moderation_warning" in st.session_state:
+        st.session_state.moderation_warning = False
 
     # Append user input to session messages
     st.session_state.messages.append({"role": "user", "content": user_input})
