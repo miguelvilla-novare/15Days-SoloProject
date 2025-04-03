@@ -1,2 +1,6 @@
 .env
+.vscode
 2-AI-study-buddy/projectenv/
+__pycache__
+*.pyc
+2-AI-study-buddy/.vscode/
