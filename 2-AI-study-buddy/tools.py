@@ -1,13 +1,8 @@
-
-from pydantic import BaseModel, Field
 from langchain.docstore.document import Document
 from langchain.chains.summarize import load_summarize_chain
 from langchain.prompts import PromptTemplate
 from langchain.tools import tool
 from utils import parse_questions, parse_flashcards
-
-class GetSummarySchema(BaseModel):
-    text_chunks: list[str] = Field(..., description="List of text chunks to summarize")
 
 # Summarization function (takes `model` as a parameter)
 @tool

@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 from display import display_quiz, display_flashcards 
 from langchain.chains import RetrievalQA 
